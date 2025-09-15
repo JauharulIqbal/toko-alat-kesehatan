@@ -62,7 +62,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     // Produk
-    Route::resource('produk', ProdukController::class);
+    Route::prefix('produk')->name('produk.')->group(function () {
+        Route::get('/', [ProdukController::class, 'index'])->name('index');
+        Route::get('/create', [ProdukController::class, 'create'])->name('create');
+        Route::post('/', [ProdukController::class, 'store'])->name('store');
+        Route::get('/{produk}', [ProdukController::class, 'show'])->name('show');
+        Route::get('/{produk}/edit', [ProdukController::class, 'edit'])->name('edit');
+        Route::put('/{produk}', [ProdukController::class, 'update'])->name('update');
+        Route::delete('/{produk}', [ProdukController::class, 'destroy'])->name('destroy');
+
+        // Export PDF
+        Route::get('/export/pdf', [ProdukController::class, 'exportPdf'])->name('export-pdf');
+
+        // Additional Routes
+        Route::get('/statistics/data', [ProdukController::class, 'getStatistics'])->name('statistics');
+        Route::post('/bulk-action', [ProdukController::class, 'bulkAction'])->name('bulk-action');
+        Route::patch('/{produk}/status', [ProdukController::class, 'changeStatus'])->name('change-status');
+    });
 
     // Pembayaran
     Route::resource('pembayaran', PembayaranController::class);

@@ -8,7 +8,7 @@ use App\Models\Kategori;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProdukController extends Controller
 {
@@ -171,42 +171,75 @@ class ProdukController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $query = Produk::with(['kategori', 'toko']);
+        try {
+            // Get the same filtered data as index
+            $query = Produk::with(['kategori', 'toko']);
 
-        // Apply same filters as index
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_produk', 'LIKE', "%{$search}%")
-                    ->orWhere('deskripsi', 'LIKE', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('kategori')) {
-            $query->where('id_kategori', $request->kategori);
-        }
-
-        if ($request->filled('toko')) {
-            $query->where('id_toko', $request->toko);
-        }
-
-        if ($request->filled('stok')) {
-            switch ($request->stok) {
-                case 'habis':
-                    $query->where('stok', 0);
-                    break;
-                case 'menipis':
-                    $query->where('stok', '>', 0)->where('stok', '<=', 10);
-                    break;
-                case 'tersedia':
-                    $query->where('stok', '>', 10);
-                    break;
+            // Apply same filters as index
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama_produk', 'LIKE', "%{$search}%")
+                        ->orWhere('deskripsi', 'LIKE', "%{$search}%");
+                });
             }
+
+            if ($request->filled('kategori')) {
+                $query->where('id_kategori', $request->kategori);
+            }
+
+            if ($request->filled('toko')) {
+                $query->where('id_toko', $request->toko);
+            }
+
+            if ($request->filled('stok')) {
+                switch ($request->stok) {
+                    case 'habis':
+                        $query->where('stok', 0);
+                        break;
+                    case 'menipis':
+                        $query->where('stok', '>', 0)->where('stok', '<=', 10);
+                        break;
+                    case 'tersedia':
+                        $query->where('stok', '>', 10);
+                        break;
+                }
+            }
+
+            $query->orderBy('created_at', 'desc');
+
+            // Get all data for PDF (no pagination)
+            $produk = $query->get();
+
+            // Cek apakah view exists
+            if (!view()->exists('admin.produk.export-pdf-produk')) {
+                return redirect()->back()->with('error', 'Template PDF tidak ditemukan');
+            }
+
+            // Generate PDF dengan konfigurasi yang sama dengan TokoController
+            $pdf = Pdf::loadView('admin.produk.export-pdf-produk', compact('produk'));
+
+            // Set paper dan orientasi
+            $pdf->setPaper('a4', 'landscape');
+
+            // Set options untuk PDF yang presisi
+            $pdf->setOptions([
+                'isPhpEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => false,
+                'defaultFont' => 'Arial',
+                'dpi' => 72,
+                'debugKeepTemp' => false,
+                'debugCss' => false,
+                'debugLayout' => false,
+            ]);
+
+            $filename = 'laporan-data-produk-' . date('Y-m-d-H-i-s') . '.pdf';
+
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengeksport PDF: ' . $e->getMessage());
         }
-
-        $produk = $query->orderBy('created_at', 'desc')->get();
-
-        return view('admin.produk.export-pdf-produk', compact('produk'));
     }
 
     public function getStatistics()

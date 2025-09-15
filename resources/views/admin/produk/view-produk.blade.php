@@ -5,7 +5,7 @@
             <p class="text-muted mb-0">Kelola data produk alat kesehatan</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.produk.exportPdf') }}" class="btn btn-outline-success" target="_blank">
+            <a href="{{ route('admin.produk.export-pdf') }}" class="btn btn-outline-success" target="_blank">
                 <i class="bi bi-file-pdf me-2"></i>Export PDF
             </a>
             <a href="{{ route('admin.produk.create') }}" class="btn btn-primary">
