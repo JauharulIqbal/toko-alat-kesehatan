@@ -45,12 +45,22 @@
         </li>
 
         <li class="nav-item mb-2">
-            <a href="{{ route('admin.pembayaran.index') }}"
-                class="nav-link d-flex align-items-center gap-3 px-3 py-2 {{ request()->is('admin/pembayaran*') ? 'sidebar-active' : '' }}">
+            <a href="{{ route('admin.metode-pembayaran.index') }}"
+                class="nav-link d-flex align-items-center gap-3 px-3 py-2 {{ request()->is('admin/metode-pembayaran*') ? 'sidebar-active' : '' }}">
                 <div class="icon-wrapper">
                     <i class="bi bi-credit-card"></i>
                 </div>
-                <span class="fw-semibold">Pembayaran</span>
+                <span class="fw-semibold">Metode Pembayaran</span>
+            </a>
+        </li>
+
+        <li class="nav-item mb-2">
+            <a href="#"
+                class="nav-link d-flex align-items-center gap-3 px-3 py-2 {{ request()->is('admin/transaksi*') ? 'sidebar-active' : '' }}">
+                <div class="icon-wrapper">
+                    <i class="bi bi-credit-card"></i>
+                </div>
+                <span class="fw-semibold">Transaksi</span>
             </a>
         </li>
 
@@ -66,16 +76,16 @@
 
         <li class="nav-item mb-2">
             <a href="#"
-                class="nav-link d-flex align-items-center gap-3 px-3 py-2 {{ request()->is('admin/customer*') ? 'sidebar-active' : '' }}">
+                class="nav-link d-flex align-items-center gap-3 px-3 py-2 {{ request()->is('admin/pengguna*') ? 'sidebar-active' : '' }}">
                 <div class="icon-wrapper">
                     <i class="bi bi-people"></i>
                 </div>
-                <span class="fw-semibold">Customer</span>
+                <span class="fw-semibold">Pengguna</span>
             </a>
         </li>
         
         <li class="nav-item mb-2">
-            <a href="#"
+            <a href="{{ route('admin.kota.index') }}"
                 class="nav-link d-flex align-items-center gap-3 px-3 py-2 {{ request()->is('admin/kota*') ? 'sidebar-active' : '' }}">
                 <div class="icon-wrapper">
                     <i class="bi bi-geo-alt"></i>

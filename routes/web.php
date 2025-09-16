@@ -4,11 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\TokoController;
 use App\Http\Controllers\Admin\ProdukController;
-use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GuestBookController;
-use App\Http\Controllers\Admin\PembayaranController;
+use App\Http\Controllers\Admin\MetodePembayaranController;
+use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Admin\JasaPengirimanController;
 
 // Route untuk visitor (public)
@@ -80,17 +81,74 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/{produk}/status', [ProdukController::class, 'changeStatus'])->name('change-status');
     });
 
-    // Pembayaran
-    Route::resource('pembayaran', PembayaranController::class);
+    // Metode Pembayaran
+    Route::prefix('metode-pembayaran')->name('metode-pembayaran.')->group(function () {
+        Route::get('/', [MetodePembayaranController::class, 'index'])->name('index');
+        Route::get('/create', [MetodePembayaranController::class, 'create'])->name('create');
+        Route::post('/', [MetodePembayaranController::class, 'store'])->name('store');
+        Route::get('/{metodePembayaran}', [MetodePembayaranController::class, 'show'])->name('show');
+        Route::get('/{metodePembayaran}/edit', [MetodePembayaranController::class, 'edit'])->name('edit');
+        Route::put('/{metodePembayaran}', [MetodePembayaranController::class, 'update'])->name('update');
+        Route::delete('/{metodePembayaran}', [MetodePembayaranController::class, 'destroy'])->name('destroy');
+
+        // Additional Routes
+        Route::get('/statistics/data', [MetodePembayaranController::class, 'getStatistics'])->name('statistics');
+        Route::post('/bulk-action', [MetodePembayaranController::class, 'bulkAction'])->name('bulk-action');
+        Route::post('/check-duplicate', [MetodePembayaranController::class, 'checkDuplicate'])->name('check-duplicate');
+    });
+
+    // Transaksi
+    Route::resource('transaksi', TransaksiController::class);
 
     // Jasa Pengiriman
-    Route::resource('jasa-pengiriman', JasaPengirimanController::class);
+    Route::prefix('jasa-pengiriman')->name('jasa-pengiriman.')->group(function () {
+        Route::get('/', [JasaPengirimanController::class, 'index'])->name('index');
+        Route::get('/create', [JasaPengirimanController::class, 'create'])->name('create');
+        Route::post('/', [JasaPengirimanController::class, 'store'])->name('store');
+        Route::get('/{jasaPengiriman}', [JasaPengirimanController::class, 'show'])->name('show');
+        Route::get('/{jasaPengiriman}/edit', [JasaPengirimanController::class, 'edit'])->name('edit');
+        Route::put('/{jasaPengiriman}', [JasaPengirimanController::class, 'update'])->name('update');
+        Route::delete('/{jasaPengiriman}', [JasaPengirimanController::class, 'destroy'])->name('destroy');
 
-    // Customer (jika admin bisa kelola customer)
-    Route::resource('customer', CustomerController::class);
+        // Additional Routes untuk Jasa Pengiriman
+        Route::get('/statistics/data', [JasaPengirimanController::class, 'getStatistics'])->name('statistics');
+        Route::post('/bulk-action', [JasaPengirimanController::class, 'bulkAction'])->name('bulk-action');
+    });
+
+    // Pengguna 
+    Route::prefix('pengguna')->name('pengguna.')->group(function () {
+        Route::get('/', [PenggunaController::class, 'index'])->name('index');
+        Route::get('/create', [PenggunaController::class, 'create'])->name('create');
+        Route::post('/', [PenggunaController::class, 'store'])->name('store');
+        Route::get('/{pengguna}', [PenggunaController::class, 'show'])->name('show');
+        Route::get('/{pengguna}/edit', [PenggunaController::class, 'edit'])->name('edit');
+        Route::put('/{pengguna}', [PenggunaController::class, 'update'])->name('update');
+        Route::delete('/{pengguna}', [PenggunaController::class, 'destroy'])->name('destroy');
+
+        // Export PDF
+        Route::get('/export/pdf', [PenggunaController::class, 'exportPdf'])->name('export-pdf');
+
+        // Additional Routes untuk Pengguna
+        Route::get('/statistics/data', [PenggunaController::class, 'getStatistics'])->name('statistics');
+        Route::post('/bulk-action', [PenggunaController::class, 'bulkAction'])->name('bulk-action');
+        Route::post('/check-duplicate', [PenggunaController::class, 'checkDuplicate'])->name('check-duplicate');
+    });
 
     // Kota
-    Route::resource('kota', KotaController::class);
+    Route::prefix('kota')->name('kota.')->group(function () {
+        Route::get('/', [KotaController::class, 'index'])->name('index');
+        Route::get('/create', [KotaController::class, 'create'])->name('create');
+        Route::post('/', [KotaController::class, 'store'])->name('store');
+        Route::get('/{kota}', [KotaController::class, 'show'])->name('show');
+        Route::get('/{kota}/edit', [KotaController::class, 'edit'])->name('edit');
+        Route::put('/{kota}', [KotaController::class, 'update'])->name('update');
+        Route::delete('/{kota}', [KotaController::class, 'destroy'])->name('destroy');
+
+        // Additional Routes for Kota
+        Route::get('/statistics/data', [KotaController::class, 'getStatistics'])->name('statistics');
+        Route::post('/bulk-action', [KotaController::class, 'bulkAction'])->name('bulk-action');
+        Route::post('/check-duplicate', [KotaController::class, 'checkDuplicate'])->name('check-duplicate');
+    });
 
     // Guestbook
     Route::resource('guestbook', GuestBookController::class);
