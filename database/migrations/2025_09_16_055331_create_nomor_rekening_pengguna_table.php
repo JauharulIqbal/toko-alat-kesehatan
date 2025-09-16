@@ -11,22 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pembayaran', function (Blueprint $table) {
+        Schema::create('nomor_rekening_pengguna', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            $table->uuid('id_pembayaran')->primary();
-            $table->enum('status_pembayaran', ['menunggu', 'sukses', 'gagal', 'refund']);
-            $table->decimal('jumlah_pembayaran', 14, 2);
-            $table->timestamp('paid_at');
+            $table->uuid('id_nrp')->primary();
+            $table->string('nomor_rekening', 50);
 
             // FK
-            $table->uuid('id_pesanan')->nullable();
+            $table->uuid('id_user')->nullable();
             $table->uuid('id_metode_pembayaran')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanan')->onDelete('cascade');
+            $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
             $table->foreign('id_metode_pembayaran')->references('id_metode_pembayaran')->on('metode_pembayaran')->onDelete('cascade');
+
         });
     }
 
@@ -35,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pembayaran');
+        Schema::dropIfExists('nomor_rekening_pengguna');
     }
 };

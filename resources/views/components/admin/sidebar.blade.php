@@ -75,7 +75,7 @@
         </li>
 
         <li class="nav-item mb-2">
-            <a href="#"
+            <a href="{{ route('admin.pengguna.index') }}"
                 class="nav-link d-flex align-items-center gap-3 px-3 py-2 {{ request()->is('admin/pengguna*') ? 'sidebar-active' : '' }}">
                 <div class="icon-wrapper">
                     <i class="bi bi-people"></i>

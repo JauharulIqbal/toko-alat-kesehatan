@@ -35,9 +35,11 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'timestamp',
-        'date_of_birth' => 'date',
+        'email_verified_at' => 'datetime',
+        'date_of_birth' => 'date', // Pastikan ini date, bukan datetime
         'password' => 'hashed',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relationships
@@ -64,5 +66,26 @@ class User extends Authenticatable
     public function feedbacks()
     {
         return $this->hasMany(Feedback::class, 'id_user');
+    }
+
+    // Accessor untuk mengatasi masalah casting
+    public function getDateOfBirthAttribute($value)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+
+        // Jika sudah Carbon instance, return as is
+        if ($value instanceof \Carbon\Carbon) {
+            return $value;
+        }
+
+        // Jika integer (timestamp), convert ke Carbon
+        if (is_numeric($value)) {
+            return \Carbon\Carbon::createFromTimestamp($value);
+        }
+
+        // Jika string date, parse ke Carbon
+        return \Carbon\Carbon::parse($value);
     }
 }
