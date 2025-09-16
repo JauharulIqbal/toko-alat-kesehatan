@@ -22,11 +22,19 @@ class Kota extends Model
     // Relationships
     public function users()
     {
-        return $this->hasMany(User::class, 'id_kota');
+        return $this->hasMany(User::class, 'id_kota', 'id_kota');
     }
 
-    public function tokos()
+    public function toko()
     {
-        return $this->hasMany(Toko::class, 'id_kota');
+        return $this->hasMany(Toko::class, 'id_kota', 'id_kota');
+    }
+
+    /**
+     * Get approved stores only
+     */
+    public function approvedStores()
+    {
+        return $this->toko()->where('status_toko', 'disetujui');
     }
 }

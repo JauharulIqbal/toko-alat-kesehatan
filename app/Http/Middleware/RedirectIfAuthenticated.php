@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,24 +23,28 @@ class RedirectIfAuthenticated
             if (Auth::guard($guard)->check()) {
                 $user = Auth::guard($guard)->user();
                 
-                // Redirect based on user role
-                return redirect($this->redirectPath($user->role ?? 'customer'));
+                // Redirect ke dashboard sesuai role dengan pesan
+                switch ($user->role) {
+                    case 'admin':
+                        return redirect()->route('admin.dashboard')
+                            ->with('info', 'Anda sudah login sebagai Admin.');
+                    case 'penjual':
+                        return redirect()->route('seller.dashboard')
+                            ->with('info', 'Anda sudah login sebagai Penjual.');
+                    case 'customer':
+                        return redirect()->route('customer.dashboard')
+                            ->with('info', 'Anda sudah login sebagai Customer.');
+                    default:
+                        // Jika role tidak valid, logout
+                        Auth::logout();
+                        $request->session()->invalidate();
+                        $request->session()->regenerateToken();
+                        return redirect()->route('login')
+                            ->with('error', 'Role tidak valid. Silakan login ulang.');
+                }
             }
         }
 
         return $next($request);
-    }
-
-    /**
-     * Get redirect path based on user role
-     */
-    private function redirectPath(string $role): string
-    {
-        return match ($role) {
-            'admin' => '/admin/dashboard',
-            'penjual' => '/penjual/dashboard', 
-            'customer' => '/customer/dashboard',
-            default => '/',
-        };
     }
 }

@@ -27,11 +27,27 @@ class Keranjang extends Model
     // Relationships
     public function user()
     {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
 
     public function itemKeranjangs()
     {
-        return $this->hasMany(ItemKeranjang::class, 'id_keranjang');
+        return $this->hasMany(ItemKeranjang::class, 'id_keranjang', 'id_keranjang');
+    }
+    
+    /**
+     * Get cart total items count
+     */
+    public function getTotalItemsAttribute()
+    {
+        return $this->items->count();
+    }
+
+    /**
+     * Get cart total quantity
+     */
+    public function getTotalQuantityAttribute()
+    {
+        return $this->items->sum('jumlah');
     }
 }

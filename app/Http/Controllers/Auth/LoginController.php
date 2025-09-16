@@ -2,32 +2,67 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
     /**
-     * Show the login form
+     * Show the application's login form.
      */
     public function showLoginForm()
     {
-        return view('auth.login', [
-            'title' => 'Login - ALKES SHOP'
-        ]);
+        return view('auth.login');
     }
 
     /**
-     * Handle login request
+     * Handle a login request to the application.
      */
     public function login(Request $request)
     {
-        // Validate the form data
+        $this->validateLogin($request);
+
+        // Check if the user has too many login attempts
+        if ($this->hasTooManyLoginAttempts($request)) {
+            $this->fireLockoutEvent($request);
+            return $this->sendLockoutResponse($request);
+        }
+
+        // Attempt to log the user in
+        if ($this->attemptLogin($request)) {
+            if ($request->hasSession()) {
+                $request->session()->regenerate();
+            }
+            
+            // Get the authenticated user
+            $user = Auth::user();
+            
+            // Log the login
+            $this->logSuccessfulLogin($request, $user);
+            
+            // Clear login attempts
+            $this->clearLoginAttempts($request);
+            
+            // Redirect based on role
+            return $this->authenticated($request, $user);
+        }
+
+        // If login fails, increment attempts and return error
+        $this->incrementLoginAttempts($request);
+        
+        return $this->sendFailedLoginResponse($request);
+    }
+
+    /**
+     * Validate the user login request.
+     */
+    protected function validateLogin(Request $request)
+    {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:6',
@@ -37,149 +72,179 @@ class LoginController extends Controller
             'password.required' => 'Password wajib diisi.',
             'password.min' => 'Password minimal 6 karakter.',
         ]);
+    }
 
-        // Check rate limiting
-        $key = Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
+    /**
+     * Attempt to log the user into the application.
+     */
+    protected function attemptLogin(Request $request)
+    {
+        return Auth::attempt(
+            $this->credentials($request),
+            $request->boolean('remember') // Use boolean() method yang lebih reliable
+        );
+    }
+
+    /**
+     * Get the needed authorization credentials from the request.
+     */
+    protected function credentials(Request $request)
+    {
+        return $request->only('email', 'password');
+    }
+
+    /**
+     * The user has been authenticated.
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        // Pastikan user memiliki role yang valid
+        $validRoles = ['admin', 'penjual', 'customer'];
         
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            $seconds = RateLimiter::availableIn($key);
-            throw ValidationException::withMessages([
-                'email' => 'Terlalu banyak percobaan login. Silakan coba lagi dalam ' . $seconds . ' detik.',
-            ]);
-        }
-
-        // Attempt to authenticate user
-        $credentials = $request->only('email', 'password');
-        $remember = $request->filled('remember');
-
-        try {
-            if (Auth::attempt($credentials, $remember)) {
-                // Clear rate limiting on successful login
-                RateLimiter::clear($key);
-                
-                // Regenerate session to prevent session fixation
-                $request->session()->regenerate();
-                
-                $user = Auth::user();
-                
-                // Enhanced logging for debugging
-                Log::info('Login Success', [
-                    'user_id' => $user->id_user,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'name' => $user->name,
-                    'ip' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'session_id' => session()->getId(),
-                    'auth_check' => Auth::check(),
-                ]);
-
-                // Check if user has a role
-                if (empty($user->role)) {
-                    Auth::logout();
-                    throw ValidationException::withMessages([
-                        'email' => 'Akun Anda belum memiliki role. Silakan hubungi administrator.',
-                    ]);
-                }
-
-                // Redirect based on user role with error handling
-                return $this->redirectBasedOnRole($user->role, $request);
+        if (!in_array($user->role, $validRoles)) {
+            Auth::logout();
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
             }
-        } catch (\Exception $e) {
-            Log::error('Login Error', [
-                'error' => $e->getMessage(),
-                'email' => $request->email,
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return back()->withErrors([
-                'email' => 'Terjadi kesalahan sistem. Silakan coba lagi.'
-            ])->withInput($request->except('password'));
+            return redirect()->route('login')
+                ->with('error', 'Role tidak valid. Silakan hubungi administrator.');
         }
 
-        // Increment rate limiting on failed login
-        RateLimiter::hit($key, 300); // 5 minutes
+        // Set session untuk mencegah akses balik ke site
+        if ($request->hasSession()) {
+            $request->session()->put('user_authenticated', true);
+            $request->session()->put('user_role', $user->role);
+        }
 
-        // Log failed login attempt
-        Log::warning('Failed login attempt', [
-            'email' => $request->email,
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent()
-        ]);
+        // Redirect berdasarkan role
+        switch ($user->role) {
+            case 'admin':
+                return redirect()->intended(route('admin.dashboard'))
+                    ->with('success', 'Selamat datang di Admin Panel, ' . ($user->name ?? 'Admin'));
+            case 'penjual':
+                return redirect()->intended(route('seller.dashboard'))
+                    ->with('success', 'Selamat datang di Seller Dashboard, ' . ($user->name ?? 'Penjual'));
+            case 'customer':
+                return redirect()->intended(route('customer.dashboard'))
+                    ->with('success', 'Selamat datang kembali, ' . ($user->name ?? 'Customer'));
+            default:
+                Auth::logout();
+                if ($request->hasSession()) {
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                }
+                return redirect()->route('login')
+                    ->with('error', 'Role tidak valid. Silakan hubungi administrator.');
+        }
+    }
 
+    /**
+     * Get the failed login response instance.
+     */
+    protected function sendFailedLoginResponse(Request $request)
+    {
         throw ValidationException::withMessages([
-            'email' => 'Email atau password tidak sesuai.',
+            'email' => [
+                'Email atau password yang Anda masukkan salah. Silakan coba lagi.'
+            ],
         ]);
     }
 
     /**
-     * Logout user
+     * Log a successful login.
+     */
+    protected function logSuccessfulLogin(Request $request, $user)
+    {
+        Log::info('User logged in', [
+            'user_id' => $user->id_user ?? $user->id,
+            'email' => $user->email,
+            'role' => $user->role,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+    }
+
+    /**
+     * Determine if the user has too many failed login attempts.
+     */
+    protected function hasTooManyLoginAttempts(Request $request)
+    {
+        return RateLimiter::tooManyAttempts(
+            $this->throttleKey($request), 5
+        );
+    }
+
+    /**
+     * Increment the login attempts for the user.
+     */
+    protected function incrementLoginAttempts(Request $request)
+    {
+        RateLimiter::hit($this->throttleKey($request), 60);
+    }
+
+    /**
+     * Clear the login locks for the given user credentials.
+     */
+    protected function clearLoginAttempts(Request $request)
+    {
+        RateLimiter::clear($this->throttleKey($request));
+    }
+
+    /**
+     * Fire an event when a lockout occurs.
+     */
+    protected function fireLockoutEvent(Request $request)
+    {
+        // You can dispatch an event here if needed
+    }
+
+    /**
+     * Redirect the user after determining they are locked out.
+     */
+    protected function sendLockoutResponse(Request $request)
+    {
+        $seconds = RateLimiter::availableIn($this->throttleKey($request));
+
+        throw ValidationException::withMessages([
+            'email' => [
+                'Terlalu banyak percobaan login. Silakan coba lagi dalam ' . $seconds . ' detik.',
+            ],
+        ])->status(429);
+    }
+
+    /**
+     * Get the throttle key for the given request.
+     */
+    protected function throttleKey(Request $request)
+    {
+        return Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
+    }
+
+    /**
+     * Log the user out of the application.
      */
     public function logout(Request $request)
     {
         $user = Auth::user();
         
-        // Log logout
+        // Log the logout
         if ($user) {
             Log::info('User logged out', [
-                'user_id' => $user->id_user ?? 'unknown',
+                'user_id' => $user->id_user ?? $user->id,
                 'email' => $user->email,
-                'role' => $user->role ?? 'unknown',
+                'role' => $user->role,
+                'ip' => $request->ip(),
             ]);
         }
 
         Auth::logout();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('site.home')->with('success', 'Anda telah berhasil logout.');
-    }
-
-    /**
-     * Redirect user based on their role
-     */
-    private function redirectBasedOnRole(string $role, Request $request)
-    {
-        $welcomeMessage = 'Selamat datang! Login berhasil.';
-        
-        try {
-            switch ($role) {
-                case 'admin':
-                    // Check if admin dashboard route exists
-                    if (!route('admin.dashboard', [], false)) {
-                        throw new \Exception('Admin dashboard route not found');
-                    }
-                    
-                    Log::info('Redirecting to admin dashboard', ['user_role' => $role]);
-                    return redirect()->route('admin.dashboard')
-                        ->with('success', $welcomeMessage . ' Selamat datang di Admin Dashboard.');
-                        
-                case 'penjual':
-                    Log::info('Redirecting to penjual dashboard', ['user_role' => $role]);
-                    return redirect()->route('penjual.dashboard')
-                        ->with('success', $welcomeMessage . ' Selamat datang di Penjual Dashboard.');
-                        
-                case 'customer':
-                    Log::info('Redirecting to customer dashboard', ['user_role' => $role]);
-                    return redirect()->route('customer.dashboard')
-                        ->with('success', $welcomeMessage . ' Selamat datang di Customer Dashboard.');
-                        
-                default:
-                    Log::warning('Unknown role detected during login', ['role' => $role]);
-                    return redirect()->route('site.home')
-                        ->with('warning', 'Role tidak dikenali. Anda berhasil login namun perlu verifikasi role.');
-            }
-        } catch (\Exception $e) {
-            // Jika terjadi error saat redirect, log dan redirect ke home
-            Log::error('Error during role-based redirect', [
-                'role' => $role,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return redirect()->route('site.home')
-                ->with('error', 'Login berhasil namun terjadi error redirect. Silakan coba akses dashboard manual.');
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
         }
+
+        return redirect()->route('site.home')->with('success', 'Anda berhasil keluar dari sistem.');
     }
 }

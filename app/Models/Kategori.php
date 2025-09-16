@@ -22,6 +22,10 @@ class Kategori extends Model
     // Relationships
     public function produk()
     {
-        return $this->hasMany(Produk::class, 'id_kategori');
+        return $this->hasMany(Produk::class, 'id_kategori', 'id_kategori');
+    }
+    public function availableProducts()
+    {
+        return $this->produk()->where('stok', '>', 0);
     }
 }

@@ -2,17 +2,19 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Cookie\Middleware\EncryptCookies as Middleware;
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-class EncryptCookies extends Middleware
+class EncryptCookies
 {
     /**
-     * The names of the cookies that should not be encrypted.
+     * Handle an incoming request.
      *
-     * @var array<int, string>
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    protected $except = [
-        //
-    ];
+    public function handle(Request $request, Closure $next): Response
+    {
+        return $next($request);
+    }
 }
-

@@ -43,27 +43,28 @@ class User extends Authenticatable
     ];
 
     // Relationships
+    
     public function kota()
     {
         return $this->belongsTo(Kota::class, 'id_kota');
     }
 
-    public function tokos()
+    public function toko()
     {
-        return $this->hasMany(Toko::class, 'id_user');
+        return $this->hasOne(Toko::class, 'id_user', 'id_user');
     }
 
-    public function keranjangs()
+    public function keranjang()
     {
-        return $this->hasMany(Keranjang::class, 'id_user');
+        return $this->hasOne(Keranjang::class, 'id_user', 'id_user');
     }
 
-    public function pesanans()
+    public function pesanan()
     {
-        return $this->hasMany(Pesanan::class, 'id_user');
+        return $this->hasMany(Pesanan::class, 'id_user', 'id_user');
     }
 
-    public function feedbacks()
+    public function feedback()
     {
         return $this->hasMany(Feedback::class, 'id_user');
     }

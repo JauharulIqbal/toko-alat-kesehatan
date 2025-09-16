@@ -41,12 +41,12 @@ class Produk extends Model
         return $this->belongsTo(Toko::class, 'id_toko');
     }
 
-    public function itemKeranjangs()
+    public function itemKeranjang()
     {
-        return $this->hasMany(ItemKeranjang::class, 'id_produk');
+        return $this->hasMany(ItemKeranjang::class, 'id_produk', 'id_produk');
     }
 
-    public function itemPesanans()
+    public function itemPesanan()
     {
         return $this->hasMany(ItemPesanan::class, 'id_produk');
     }

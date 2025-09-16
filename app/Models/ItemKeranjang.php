@@ -31,11 +31,19 @@ class ItemKeranjang extends Model
     // Relationships
     public function keranjang()
     {
-        return $this->belongsTo(Keranjang::class, 'id_keranjang');
+        return $this->belongsTo(Keranjang::class, 'id_keranjang', 'id_keranjang');
     }
 
     public function produk()
     {
-        return $this->belongsTo(Produk::class, 'id_produk');
+        return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
+    }
+
+    /**
+     * Get item subtotal
+     */
+    public function getSubtotalAttribute()
+    {
+        return $this->jumlah * $this->harga;
     }
 }
