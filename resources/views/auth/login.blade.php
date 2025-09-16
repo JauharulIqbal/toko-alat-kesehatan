@@ -13,6 +13,8 @@
             --accent-color: #f8f9ff;
             --text-dark: #2c3e50;
             --text-light: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
         }
 
         body {
@@ -303,6 +305,76 @@
             50% { transform: translateY(-20px) rotate(180deg); }
         }
 
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(231, 74, 59, 0.1));
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+        }
+
+        .alert-dismissible .btn-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            padding: 0.25rem;
+            color: inherit;
+            opacity: 0.7;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+
+        .alert-dismissible .btn-close:hover {
+            opacity: 1;
+        }
+
+        .is-invalid {
+            border-color: var(--danger-color) !important;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: block !important;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
         @media (max-width: 768px) {
             .login-container {
                 margin: 1rem;
@@ -323,6 +395,11 @@
             
             .form-title {
                 font-size: 1.7rem;
+            }
+
+            .alert {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -357,6 +434,43 @@
                                 <h2 class="form-title">Masuk Akun</h2>
                                 <p class="form-subtitle">Silakan masukkan kredensial Anda untuk melanjutkan</p>
 
+                                <!-- Display Flash Messages -->
+                                @if (session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>Registrasi Berhasil!</strong><br>
+                                        {{ session('success') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endif
+
+                                @if (session('error'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        {{ session('error') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endif
+
+                                @if ($errors->any())
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Login Gagal!</strong>
+                                        <ul class="mb-0 mt-2">
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endif
+
                                 <form action="{{ route('login') }}" method="POST" id="loginForm">
                                     @csrf
                                     
@@ -367,13 +481,14 @@
                                                    class="form-control @error('email') is-invalid @enderror" 
                                                    id="email" 
                                                    name="email" 
-                                                   value="{{ old('email') }}"
+                                                   value="{{ old('email', session('registered_email')) }}"
                                                    placeholder="Masukkan email Anda"
-                                                   required>
+                                                   required
+                                                   autocomplete="email">
                                             <i class="fas fa-envelope input-icon"></i>
                                         </div>
                                         @error('email')
-                                            <div class="invalid-feedback d-block">
+                                            <div class="invalid-feedback">
                                                 {{ $message }}
                                             </div>
                                         @enderror
@@ -387,29 +502,31 @@
                                                    id="password" 
                                                    name="password" 
                                                    placeholder="Masukkan password Anda"
-                                                   required>
+                                                   required
+                                                   autocomplete="current-password">
                                             <i class="fas fa-lock input-icon"></i>
                                             <button type="button" 
                                                     class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent"
-                                                    id="togglePassword">
+                                                    id="togglePassword"
+                                                    tabindex="-1">
                                                 <i class="fas fa-eye text-muted" id="eyeIcon"></i>
                                             </button>
                                         </div>
                                         @error('password')
-                                            <div class="invalid-feedback d-block">
+                                            <div class="invalid-feedback">
                                                 {{ $message }}
                                             </div>
                                         @enderror
                                     </div>
 
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                                        <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
                                         <label class="form-check-label" for="remember">
                                             Ingat saya
                                         </label>
                                     </div>
 
-                                    <button type="submit" class="btn btn-login">
+                                    <button type="submit" class="btn btn-login" id="loginBtn">
                                         <i class="fas fa-sign-in-alt me-2"></i>
                                         Masuk Sekarang
                                     </button>
@@ -455,39 +572,183 @@
             }
         });
 
-        // Form Animation
+        // Form Animation and Loading State
         document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const button = this.querySelector('.btn-login');
+            const button = document.getElementById('loginBtn');
+            
+            // Show loading state
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
             button.disabled = true;
+            
+            // Re-enable button after 10 seconds as fallback (in case of network issues)
+            setTimeout(function() {
+                if (button.disabled) {
+                    button.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Masuk Sekarang';
+                    button.disabled = false;
+                }
+            }, 10000);
         });
 
-        // Input Animation
+        // Input Animation and Focus Effects
         document.querySelectorAll('.form-control').forEach(input => {
             input.addEventListener('focus', function() {
                 this.parentElement.style.transform = 'scale(1.02)';
+                this.style.borderColor = 'var(--primary-color)';
             });
             
             input.addEventListener('blur', function() {
                 this.parentElement.style.transform = 'scale(1)';
+                if (!this.matches(':focus')) {
+                    this.style.borderColor = '';
+                }
+            });
+
+            // Real-time validation feedback
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    this.classList.remove('is-invalid');
+                }
             });
         });
 
-        // Error Animation
-        document.querySelectorAll('.is-invalid').forEach(input => {
-            input.style.animation = 'shake 0.5s ease-in-out';
+        // Auto-focus email field if it has value from session
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            if (emailInput.value) {
+                // If email is pre-filled, focus on password field instead
+                document.getElementById('password').focus();
+                
+                // Add a subtle highlight to show email is pre-filled
+                emailInput.style.backgroundColor = 'rgba(40, 167, 69, 0.05)';
+                emailInput.style.borderColor = 'var(--success-color)';
+                
+                setTimeout(function() {
+                    emailInput.style.backgroundColor = '';
+                    emailInput.style.borderColor = '';
+                }, 3000);
+            } else {
+                emailInput.focus();
+            }
         });
 
-        // Add shake animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
+        // Enhanced Error Animation
+        document.querySelectorAll('.is-invalid').forEach(input => {
+            input.style.animation = 'shake 0.5s ease-in-out';
+            
+            // Remove animation after it completes
+            setTimeout(() => {
+                input.style.animation = '';
+            }, 500);
+        });
+
+        // Auto-dismiss alerts after 8 seconds
+        document.querySelectorAll('.alert').forEach(alert => {
+            // Don't auto-dismiss error alerts, only success ones
+            if (alert.classList.contains('alert-success')) {
+                setTimeout(() => {
+                    if (alert.classList.contains('show')) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 8000);
             }
-        `;
-        document.head.appendChild(style);
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt + R to go to register
+            if (e.altKey && e.key === 'r') {
+                e.preventDefault();
+                window.location.href = "{{ route('register') }}";
+            }
+            
+            // Alt + F to focus on forgot password
+            if (e.altKey && e.key === 'f') {
+                e.preventDefault();
+                document.querySelector('.forgot-password a').focus();
+            }
+        });
+
+        // Prevent form resubmission on page refresh
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+
+        // Show success message with animation if registration was successful
+        <?php if(session('success')): ?>
+        document.addEventListener('DOMContentLoaded', function() {
+            const successAlert = document.querySelector('.alert-success');
+            if (successAlert) {
+                // Add extra emphasis for registration success
+                successAlert.style.boxShadow = '0 8px 25px rgba(40, 167, 69, 0.2)';
+                successAlert.style.transform = 'scale(1.02)';
+                
+                // Restore normal appearance after 2 seconds
+                setTimeout(() => {
+                    successAlert.style.boxShadow = '';
+                    successAlert.style.transform = '';
+                }, 2000);
+            }
+        });
+        <?php endif; ?>
+
+        // Add subtle hover effects to links
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-1px)';
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+            });
+        });
+
+        // Enhanced form validation
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+            let isValid = true;
+
+            // Reset previous validation states
+            [email, password].forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+
+            // Validate email
+            if (!email.value || !email.validity.valid) {
+                email.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            // Validate password
+            if (!password.value || password.value.length < 6) {
+                password.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            // If validation fails, prevent submission and restore button
+            if (!isValid) {
+                e.preventDefault();
+                const button = document.getElementById('loginBtn');
+                button.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Masuk Sekarang';
+                button.disabled = false;
+                
+                // Focus first invalid field
+                const firstInvalid = this.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                }
+            }
+        });
+
+        // Console log for debugging (remove in production)
+        console.log('Login page loaded successfully');
+        
+        // Check if email was pre-filled from registration
+        const preFilledEmail = "{{ session('registered_email') ?? '' }}";
+        if (preFilledEmail) {
+            console.log('Pre-filled email from registration:', preFilledEmail);
+        }
     </script>
 </body>
 </html>

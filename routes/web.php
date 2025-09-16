@@ -1,32 +1,33 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Auth\LoginController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\KotaController;
 
 // Import Site Controllers
-use App\Http\Controllers\Site\HomeController as SiteHomeController;
+use App\Http\Controllers\Admin\TokoController;
 
 // Import Admin Controllers
-use App\Http\Controllers\Admin\KotaController;
-use App\Http\Controllers\Admin\TokoController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\ProdukController;
-use App\Http\Controllers\Admin\PenggunaController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Admin\KategoriController;
+use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GuestBookController;
-use App\Http\Controllers\Admin\MetodePembayaranController;
 use App\Http\Controllers\Admin\TransaksiController;
-use App\Http\Controllers\Admin\JasaPengirimanController;
+use App\Http\Controllers\Customer\ProfilController;
 
 // Import Customer Controllers
-use App\Http\Controllers\Customer\HomeController;
-use App\Http\Controllers\Customer\ProdukController as CustomerProdukController;
-use App\Http\Controllers\Customer\TokoController as CustomerTokoController;
-use App\Http\Controllers\Customer\KeranjangController;
 use App\Http\Controllers\Customer\PesananController;
-use App\Http\Controllers\Customer\ProfilController;
 use App\Http\Controllers\Customer\CheckoutController;
+use App\Http\Controllers\Customer\KeranjangController;
+use App\Http\Controllers\Admin\JasaPengirimanController;
+use App\Http\Controllers\Admin\MetodePembayaranController;
+use App\Http\Controllers\Site\HomeController as SiteHomeController;
+use App\Http\Controllers\Customer\TokoController as CustomerTokoController;
+use App\Http\Controllers\Customer\ProdukController as CustomerProdukController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,15 +45,15 @@ Route::middleware('guest')->group(function () {
     // Login routes
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
+
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register']);
     
     // Password Reset Routes (if you want to implement them later)
     Route::get('/forgot-password', function () {
         return view('auth.forgot-password', ['title' => 'Lupa Password - ALKES SHOP']);
     })->name('password.request');
     
-    Route::get('/register', function () {
-        return view('auth.register', ['title' => 'Daftar - ALKES SHOP']);
-    })->name('register');
 });
 
 /*

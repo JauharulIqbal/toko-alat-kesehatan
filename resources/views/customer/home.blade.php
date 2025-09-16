@@ -191,14 +191,6 @@
                                             <i class="bi bi-x-circle me-1"></i>Habis
                                         </span>
                                     @endif
-
-                                    <!-- Wishlist Button -->
-                                    <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle wishlist-btn"
-                                            data-product-id="{{ $product->id_produk }}"
-                                            data-bs-toggle="tooltip" 
-                                            title="Tambah ke Wishlist">
-                                        <i class="bi bi-heart"></i>
-                                    </button>
                                 </div>
 
                                 <div class="card-body d-flex flex-column">
@@ -360,25 +352,6 @@
             color: var(--bs-primary) !important;
         }
 
-        .wishlist-btn {
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .wishlist-btn:hover {
-            background-color: var(--bs-danger) !important;
-            color: white !important;
-        }
-
-        .wishlist-btn.active {
-            background-color: var(--bs-danger);
-            color: white;
-        }
-
         @media (max-width: 768px) {
             .hero-section {
                 min-height: auto;
@@ -407,7 +380,7 @@
                 
                 // Show loading state
                 const originalText = button.html();
-                button.html('<span class="loading-spinner me-1"></span>Loading...').prop('disabled', true);
+                button.html('<span class="spinner-border spinner-border-sm me-1" role="status"></span>Loading...').prop('disabled', true);
                 
                 $.ajax({
                     url: '{{ route("customer.keranjang.add") }}',
@@ -421,8 +394,8 @@
                         if (response.success) {
                             showToast('Produk berhasil ditambahkan ke keranjang', 'success');
                             
-                            // Update cart count
-                            if (response.cart_count) {
+                            // Update cart count if element exists
+                            if (response.cart_count && $('#cartCount').length) {
                                 $('#cartCount').text(response.cart_count);
                             }
                         } else {
@@ -440,47 +413,6 @@
                     complete: function() {
                         // Reset button state
                         button.html(originalText).prop('disabled', false);
-                    }
-                });
-            });
-
-            // Wishlist functionality
-            $('.wishlist-btn').on('click', function() {
-                const productId = $(this).data('product-id');
-                const button = $(this);
-                
-                $.ajax({
-                    url: '{{ route("customer.wishlist.toggle") }}',
-                    method: 'POST',
-                    data: {
-                        id_produk: productId,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            if (response.added) {
-                                button.addClass('active');
-                                button.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
-                                showToast('Ditambahkan ke wishlist', 'success');
-                            } else {
-                                button.removeClass('active');
-                                button.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
-                                showToast('Dihapus dari wishlist', 'info');
-                            }
-                            
-                            // Update wishlist count
-                            if (response.wishlist_count !== undefined) {
-                                $('#wishlistCount').text(response.wishlist_count);
-                            }
-                        }
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 401) {
-                            showToast('Silakan login terlebih dahulu', 'warning');
-                            window.location.href = '{{ route("login") }}';
-                        } else {
-                            showToast('Terjadi kesalahan. Silakan coba lagi.', 'error');
-                        }
                     }
                 });
             });
@@ -519,15 +451,58 @@
                 });
             });
 
+            // Toast notification function
+            function showToast(message, type = 'info') {
+                // Create toast container if it doesn't exist
+                if (!$('#toastContainer').length) {
+                    $('body').append(`
+                        <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+                    `);
+                }
+
+                const toastId = 'toast_' + Date.now();
+                const bgClass = type === 'success' ? 'bg-success' : 
+                               type === 'error' ? 'bg-danger' : 
+                               type === 'warning' ? 'bg-warning' : 'bg-info';
+
+                const toast = $(`
+                    <div id="${toastId}" class="toast ${bgClass} text-white" role="alert">
+                        <div class="toast-body">
+                            ${message}
+                            <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                `);
+
+                $('#toastContainer').append(toast);
+                
+                // Initialize and show toast
+                const bsToast = new bootstrap.Toast(toast[0], {
+                    autohide: true,
+                    delay: 3000
+                });
+                bsToast.show();
+
+                // Remove toast element after it's hidden
+                toast[0].addEventListener('hidden.bs.toast', function() {
+                    $(this).remove();
+                });
+            }
+
+            // Make showToast available globally
+            window.showToast = showToast;
+
             // Lazy loading for images
             if ('IntersectionObserver' in window) {
                 const imageObserver = new IntersectionObserver((entries, observer) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             const img = entry.target;
-                            img.src = img.dataset.src;
-                            img.classList.remove('loading');
-                            imageObserver.unobserve(img);
+                            if (img.dataset.src) {
+                                img.src = img.dataset.src;
+                                img.classList.remove('loading');
+                                imageObserver.unobserve(img);
+                            }
                         }
                     });
                 });
