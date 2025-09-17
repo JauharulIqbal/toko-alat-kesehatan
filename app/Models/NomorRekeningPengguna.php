@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class NomorRekeningPengguna extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'nomor_rekening_pengguna';
     protected $primaryKey = 'id_nrp';
@@ -43,5 +44,11 @@ class NomorRekeningPengguna extends Model
     public function metodePembayaran()
     {
         return $this->belongsTo(MetodePembayaran::class, 'id_metode_pembayaran', 'id_metode_pembayaran');
+    }
+
+    // relasi ke pembayaran
+    public function pembayarans()
+    {
+        return $this->hasMany(Pembayaran::class, 'id_nrp', 'id_nrp');
     }
 }

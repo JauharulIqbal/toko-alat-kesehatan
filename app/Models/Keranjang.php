@@ -17,16 +17,12 @@ class Keranjang extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id_keranjang',
+        'subtotal',
         'id_user',
-        'subtotal'
     ];
 
     protected $casts = [
         'subtotal' => 'decimal:2',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime'
     ];
 
     /**

@@ -16,6 +16,7 @@ class Invoice extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'nomor_invoice',
         'file_path',
         'kirim_ke_email',
         'status_kirim',
@@ -24,7 +25,9 @@ class Invoice extends Model
     ];
 
     protected $casts = [
-        'dikirim_pada' => 'timestamp',
+        'dikirim_pada' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relationships

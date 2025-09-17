@@ -28,6 +28,30 @@
             </div>
         </div>
 
+        @if(!$hasRequiredPaymentMethods)
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-warning border-0 shadow-sm">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                        <div class="flex-grow-1">
+                            <h6 class="alert-heading mb-2">Metode Pembayaran Belum Lengkap</h6>
+                            <p class="mb-2">Anda belum menambahkan nomor rekening untuk metode pembayaran berikut:</p>
+                            <ul class="mb-2">
+                                @foreach($missingPaymentMethods as $method)
+                                <li>{{ $method }}</li>
+                                @endforeach
+                            </ul>
+                            <a href="{{ route('customer.profil.payment-methods') }}" class="btn btn-warning btn-sm">
+                                <i class="bi bi-plus-circle me-1"></i>Tambahkan Metode Pembayaran
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <form id="checkoutForm" method="POST" action="{{ route('customer.checkout.process') }}">
             @csrf
             <div class="row g-4">
@@ -132,26 +156,80 @@
                         </div>
                         <div class="card-body">
                             @foreach($metodePembayaran as $metode)
-                            <div class="form-check border rounded p-3 mb-3">
-                                <input class="form-check-input" type="radio" name="id_metode_pembayaran"
+                            <div class="form-check border rounded p-3 mb-3 payment-method-option" data-type="{{ $metode->tipe_pembayaran }}">
+                                <input class="form-check-input payment-method-radio" type="radio" name="id_metode_pembayaran"
                                     id="metode{{ $metode->id_metode_pembayaran }}"
                                     value="{{ $metode->id_metode_pembayaran }}"
+                                    data-type="{{ $metode->tipe_pembayaran }}"
                                     {{ old('id_metode_pembayaran') == $metode->id_metode_pembayaran ? 'checked' : '' }}
+                                    @if($metode->tipe_pembayaran === 'prepaid' && $metode->nomorRekeningPengguna->isEmpty()) disabled @endif
                                     required>
                                 <label class="form-check-label w-100" for="metode{{ $metode->id_metode_pembayaran }}">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3">
-                                            <i class="bi bi-credit-card-2-front fs-3 text-primary"></i>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="bi bi-credit-card-2-front fs-3 text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">{{ $metode->metode_pembayaran }}</h6>
+                                                <small class="text-muted">
+                                                    {{ $metode->tipe_pembayaran === 'prepaid' ? 'Pembayaran di muka' : 'Bayar di tempat (COD)' }}
+                                                </small>
+                                                @if($metode->tipe_pembayaran === 'prepaid' && $metode->nomorRekeningPengguna->isEmpty())
+                                                <div class="mt-1">
+                                                    <span class="badge bg-warning text-dark">Nomor rekening belum ditambahkan</span>
+                                                </div>
+                                                @endif
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">{{ $metode->metode_pembayaran }}</h6>
-                                            <small class="text-muted">{{ $metode->deskripsi ?? 'Pembayaran melalui ' . $metode->metode_pembayaran }}</small>
+                                        <div class="text-end">
+                                            <span class="badge bg-{{ $metode->tipe_pembayaran === 'prepaid' ? 'primary' : 'success' }}">
+                                                {{ strtoupper($metode->tipe_pembayaran) }}
+                                            </span>
                                         </div>
                                     </div>
                                 </label>
+
+                                <!-- Account Number Selection for Prepaid -->
+                                @if($metode->tipe_pembayaran === 'prepaid' && $metode->nomorRekeningPengguna->isNotEmpty())
+                                <div class="account-selection mt-3" id="account{{ $metode->id_metode_pembayaran }}" style="display: none;">
+                                    <label class="form-label fw-semibold small text-muted">PILIH NOMOR REKENING:</label>
+                                    @foreach($metode->nomorRekeningPengguna as $account)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input account-radio" type="radio" 
+                                            name="id_nrp" 
+                                            id="account{{ $account->id_nrp }}"
+                                            value="{{ $account->id_nrp }}">
+                                        <label class="form-check-label" for="account{{ $account->id_nrp }}">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-credit-card me-2 text-muted"></i>
+                                                <div>
+                                                    <span class="fw-semibold">{{ $account->nomor_rekening }}</span>
+                                                    <small class="text-muted d-block">{{ $metode->metode_pembayaran }}</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @endif
+
+                                <!-- Manual Input for COD -->
+                                <div class="manual-input mt-3" id="manual{{ $metode->id_metode_pembayaran }}" style="display: none;">
+                                    <label class="form-label fw-semibold small text-muted">NOMOR TELEPON UNTUK KONFIRMASI COD:</label>
+                                    <input type="text" class="form-control" name="nomor_rekening_input" 
+                                        placeholder="Masukkan nomor telepon" maxlength="15">
+                                    <small class="text-muted">Nomor telepon akan digunakan untuk koordinasi pengiriman COD</small>
+                                </div>
                             </div>
                             @endforeach
                             @error('id_metode_pembayaran')
+                            <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+                            @error('id_nrp')
+                            <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+                            @error('nomor_rekening_input')
                             <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
@@ -174,7 +252,7 @@
 
                             <div class="d-flex justify-content-between mb-3">
                                 <span>Biaya Pengiriman</span>
-                                <span class="fw-semibold" id="shippingCost">Rp 0</span>
+                                <span class="fw-semibold" id="shippingCost">Pilih jasa pengiriman</span>
                             </div>
 
                             <hr>
@@ -203,12 +281,39 @@
 
     @push('styles')
     <style>
-        .form-check:hover {
+        .payment-method-option:hover {
             background-color: rgba(13, 110, 253, 0.05);
+            border-color: #0d6efd !important;
+        }
+
+        .payment-method-option.selected {
+            border-color: #0d6efd !important;
+            background-color: rgba(13, 110, 253, 0.1);
         }
 
         .form-check-input:checked+.form-check-label {
             color: var(--bs-primary);
+        }
+
+        .account-selection {
+            border-top: 1px solid #dee2e6;
+            padding-top: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+            padding: 1rem;
+        }
+
+        .manual-input {
+            border-top: 1px solid #dee2e6;
+            padding-top: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+            padding: 1rem;
+        }
+
+        .payment-method-option:has(.form-check-input:disabled) {
+            opacity: 0.6;
+            background-color: #f8f9fa;
         }
 
         .sticky-top {
@@ -229,24 +334,87 @@
     @push('scripts')
     <script>
         $(document).ready(function() {
-            const subtotal = {
-                
-                    $subtotal
-                
-            };
+            const subtotal = {{ $subtotal }};
+            let currentShippingCost = 0;
 
             // Update shipping cost when service is selected
             $('#id_jasa_pengiriman').on('change', function() {
-                const shippingCost = $(this).find(':selected').data('cost') || 0;
+                const shippingCost = parseInt($(this).find(':selected').data('cost') || 0);
+                currentShippingCost = shippingCost;
                 const total = subtotal + shippingCost;
 
-                $('#shippingCost').text('Rp ' + new Intl.NumberFormat('id-ID').format(shippingCost));
+                if (shippingCost > 0) {
+                    $('#shippingCost').text('Rp ' + new Intl.NumberFormat('id-ID').format(shippingCost));
+                } else {
+                    $('#shippingCost').text('Rp 0');
+                }
                 $('#totalAmount').text('Rp ' + new Intl.NumberFormat('id-ID').format(total));
+            });
+
+            // Handle payment method selection
+            $('.payment-method-radio').on('change', function() {
+                const selectedMethod = $(this);
+                const methodType = selectedMethod.data('type');
+                const methodId = selectedMethod.val();
+
+                // Reset all selections
+                $('.payment-method-option').removeClass('selected');
+                $('.account-selection, .manual-input').hide();
+                $('.account-radio').prop('required', false);
+                $('input[name="nomor_rekening_input"]').prop('required', false);
+
+                // Highlight selected method
+                selectedMethod.closest('.payment-method-option').addClass('selected');
+
+                if (methodType === 'prepaid') {
+                    // Show account selection for prepaid
+                    $('#account' + methodId).show();
+                    $('#account' + methodId + ' .account-radio').prop('required', true);
+                } else {
+                    // Show manual input for postpaid (COD)
+                    $('#manual' + methodId).show();
+                    $('#manual' + methodId + ' input[name="nomor_rekening_input"]').prop('required', true);
+                }
+            });
+
+            // Handle account selection for prepaid methods
+            $('.account-radio').on('change', function() {
+                // Remove required from other account radios
+                $('.account-radio').not(this).prop('required', false);
             });
 
             // Form submission
             $('#checkoutForm').on('submit', function(e) {
                 e.preventDefault();
+
+                // Validate shipping selection
+                if (!$('#id_jasa_pengiriman').val()) {
+                    showToast('Silakan pilih jasa pengiriman', 'error');
+                    return;
+                }
+
+                // Validate payment method selection
+                if (!$('input[name="id_metode_pembayaran"]:checked').length) {
+                    showToast('Silakan pilih metode pembayaran', 'error');
+                    return;
+                }
+
+                const selectedPaymentType = $('input[name="id_metode_pembayaran"]:checked').data('type');
+                
+                // Validate account selection for prepaid
+                if (selectedPaymentType === 'prepaid') {
+                    if (!$('input[name="id_nrp"]:checked').length) {
+                        showToast('Silakan pilih nomor rekening', 'error');
+                        return;
+                    }
+                } else {
+                    // Validate phone number for COD
+                    const phoneNumber = $('input[name="nomor_rekening_input"]').val();
+                    if (!phoneNumber || phoneNumber.trim() === '') {
+                        showToast('Silakan masukkan nomor telepon untuk koordinasi COD', 'error');
+                        return;
+                    }
+                }
 
                 const submitBtn = $('#submitCheckout');
                 const originalText = submitBtn.html();
@@ -264,11 +432,13 @@
                             showToast('Pesanan berhasil dibuat!', 'success');
 
                             // Redirect to success page
-                            if (response.redirect_url) {
-                                window.location.href = response.redirect_url;
-                            } else {
-                                window.location.href = '{{ route("customer.pesanan.index") }}';
-                            }
+                            setTimeout(function() {
+                                if (response.redirect_url) {
+                                    window.location.href = response.redirect_url;
+                                } else {
+                                    window.location.href = '{{ route("customer.pesanan.index") }}';
+                                }
+                            }, 1500);
                         } else {
                             showToast(response.message || 'Terjadi kesalahan', 'error');
                         }
@@ -280,7 +450,8 @@
                             // Validation errors
                             const errors = xhr.responseJSON.errors;
                             if (errors) {
-                                message = Object.values(errors).flat().join(', ');
+                                const firstError = Object.values(errors)[0];
+                                message = Array.isArray(firstError) ? firstError[0] : firstError;
                             }
                         } else if (xhr.responseJSON && xhr.responseJSON.message) {
                             message = xhr.responseJSON.message;
@@ -293,6 +464,12 @@
                     }
                 });
             });
+
+            // Initialize on page load
+            const checkedPaymentMethod = $('input[name="id_metode_pembayaran"]:checked');
+            if (checkedPaymentMethod.length) {
+                checkedPaymentMethod.trigger('change');
+            }
 
             function showToast(message, type = 'info') {
                 if (!$('#toastContainer').length) {

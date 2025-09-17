@@ -18,6 +18,8 @@ class Pesanan extends Model
     protected $fillable = [
         'status_pesanan',
         'total_harga_checkout',
+        'alamat_pengiriman',
+        'catatan',
         'id_user',
         'id_jasa_pengiriman',
     ];
@@ -37,6 +39,11 @@ class Pesanan extends Model
         return $this->belongsTo(JasaPengiriman::class, 'id_jasa_pengiriman');
     }
 
+    public function items()
+    {
+        return $this->hasMany(ItemPesanan::class, 'id_pesanan');
+    }
+
     public function itemPesanans()
     {
         return $this->hasMany(ItemPesanan::class, 'id_pesanan');
@@ -45,6 +52,16 @@ class Pesanan extends Model
     public function invoices()
     {
         return $this->hasMany(Invoice::class, 'id_pesanan');
+    }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class, 'id_pesanan');
+    }
+
+    public function pembayaran()
+    {
+        return $this->hasOne(Pembayaran::class, 'id_pesanan');
     }
 
     public function pembayarans()

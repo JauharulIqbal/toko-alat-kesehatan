@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->uuid('id_invoice')->primary();
+            $table->string('nomor_invoice')->unique()->after('id_invoice');
             $table->string('file_path');
             $table->string('kirim_ke_email'); 
             $table->enum('status_kirim', ['berhasil', 'gagal']); 

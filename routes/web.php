@@ -297,13 +297,23 @@ Route::prefix('customer')->name('customer.')->middleware(['auth'])->group(functi
         Route::get('/', [CheckoutController::class, 'index'])->name('index');
         Route::post('/process', [CheckoutController::class, 'process'])->name('process');
         Route::get('/success/{orderId}', [CheckoutController::class, 'success'])->name('success');
+        Route::get('/payment-methods/{metodeId}', [CheckoutController::class, 'getPaymentMethods'])->name('payment-methods');
+        Route::get('/invoice/{invoiceId}/download', [CheckoutController::class, 'downloadInvoice'])->name('invoice.download');
     });
 
-    // Profile
+    // Profile 
     Route::prefix('profil')->name('profil.')->group(function () {
         Route::get('/', [ProfilController::class, 'show'])->name('show');
         Route::get('/edit', [ProfilController::class, 'edit'])->name('edit');
         Route::put('/update', [ProfilController::class, 'update'])->name('update');
+
+        // Payment Methods
+        Route::get('/payment-methods', [ProfilController::class, 'paymentMethods'])->name('payment-methods');
+        Route::post('/payment-methods', [ProfilController::class, 'storePaymentMethod'])->name('payment-methods.store');
+        Route::put('/payment-methods/{id}', [ProfilController::class, 'updatePaymentMethod'])->name('payment-methods.update');
+        Route::delete('/payment-methods/{id}', [ProfilController::class, 'deletePaymentMethod'])->name('payment-methods.destroy');
+
+        // Addresses
         Route::get('/alamat', [ProfilController::class, 'addresses'])->name('addresses');
         Route::post('/alamat', [ProfilController::class, 'storeAddress'])->name('addresses.store');
         Route::put('/alamat/{id}', [ProfilController::class, 'updateAddress'])->name('addresses.update');

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -72,6 +73,22 @@ class User extends Authenticatable
     public function nomorRekeningPengguna()
     {
         return $this->hasMany(NomorRekeningPengguna::class, 'id_user', 'id_user');
+    }
+
+    /**
+     * Get or create keranjang for this user
+     */
+    public function getOrCreateKeranjang()
+    {
+        if (!$this->keranjang) {
+            $this->keranjang = Keranjang::create([
+                'id_keranjang' => Str::uuid(),
+                'id_user' => $this->id_user,
+                'subtotal' => 0
+            ]);
+        }
+
+        return $this->keranjang;
     }
 
     // Accessor untuk mengatasi masalah casting

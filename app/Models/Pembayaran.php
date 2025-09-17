@@ -21,11 +21,12 @@ class Pembayaran extends Model
         'paid_at',
         'id_pesanan',
         'id_metode_pembayaran',
+        'id_nrp',
     ];
 
     protected $casts = [
         'jumlah_pembayaran' => 'decimal:2',
-        'paid_at' => 'timestamp',
+        'paid_at' => 'datetime',
     ];
 
     // Relationships
@@ -37,5 +38,10 @@ class Pembayaran extends Model
     public function metodePembayaran()
     {
         return $this->belongsTo(MetodePembayaran::class, 'id_metode_pembayaran');
+    }
+
+    public function nomorRekeningPengguna()
+    {
+        return $this->belongsTo(NomorRekeningPengguna::class, 'id_nrp', 'id_nrp');
     }
 }
