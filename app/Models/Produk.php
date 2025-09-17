@@ -50,4 +50,19 @@ class Produk extends Model
     {
         return $this->hasMany(ItemPesanan::class, 'id_produk');
     }
+
+    public function scopeAvailable($query)
+    {
+        return $query->where('stok', '>', 0);
+    }
+
+    public function scopeByCategory($query, $categoryId)
+    {
+        return $query->where('id_kategori', $categoryId);
+    }
+
+    public function scopeByStore($query, $storeId)
+    {
+        return $query->where('id_toko', $storeId);
+    }
 }

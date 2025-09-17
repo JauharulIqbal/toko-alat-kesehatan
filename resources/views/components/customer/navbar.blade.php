@@ -32,11 +32,12 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#" data-category="">Semua Kategori</a></li>
-                            @if(isset($categories))
-                                @foreach($categories as $category)
-                                    <li><a class="dropdown-item" href="#" data-category="{{ $category->id_kategori }}">{{ $category->nama_kategori }}</a></li>
-                                @endforeach
-                            @endif
+                            @php
+                                $categories = \App\Models\Kategori::orderBy('nama_kategori', 'asc')->get();
+                            @endphp
+                            @foreach($categories as $category)
+                                <li><a class="dropdown-item" href="#" data-category="{{ $category->id_kategori }}">{{ $category->nama_kategori }}</a></li>
+                            @endforeach
                         </ul>
                     </div>
                     
@@ -60,17 +61,11 @@
                 <a href="{{ route('customer.keranjang.index') }}" class="btn btn-outline-primary position-relative">
                     <i class="bi bi-cart3 fs-5"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartCount">
-                        {{ auth()->user()->keranjang ? auth()->user()->keranjang->items->count() : 0 }}
-                    </span>
-                </a>
-            </div>
-
-            <!-- Wishlist -->
-            <div class="position-relative">
-                <a href="{{ route('customer.wishlist.index') }}" class="btn btn-outline-primary position-relative">
-                    <i class="bi bi-heart fs-5"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info" id="wishlistCount">
-                        0
+                        @if(auth()->check() && auth()->user()->keranjang)
+                            {{ auth()->user()->keranjang->items()->count() ?? 0 }}
+                        @else
+                            0
+                        @endif
                     </span>
                 </a>
             </div>
@@ -134,10 +129,6 @@
                     
                     <li><a class="dropdown-item d-flex align-items-center gap-3 py-2" href="{{ route('customer.pesanan.index') }}">
                         <i class="bi bi-bag-check text-primary"></i> Pesanan Saya
-                    </a></li>
-                    
-                    <li><a class="dropdown-item d-flex align-items-center gap-3 py-2" href="{{ route('customer.wishlist.index') }}">
-                        <i class="bi bi-heart text-primary"></i> Wishlist
                     </a></li>
                     
                     <li><a class="dropdown-item d-flex align-items-center gap-3 py-2" href="{{ route('customer.profil.addresses') }}">

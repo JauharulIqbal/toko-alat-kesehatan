@@ -174,7 +174,7 @@ class HomeController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'products' => view('customer.partials.product-grid', compact('products'))->render(),
-                'pagination' => $products->links()->render()
+                'pagination' => $products->links()->toHtml()
             ]);
         }
 
@@ -199,7 +199,7 @@ class HomeController extends Controller
 
         return response()->json([
             'success' => true,
-            'products' => view('customer.partials.product-grid', compact('products'))->toHtml()
+            'products' => view('customer.partials.product-grid', compact('products'))->render()
         ]);
     }
 

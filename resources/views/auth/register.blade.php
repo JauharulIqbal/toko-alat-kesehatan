@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,8 +43,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(2deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-10px) rotate(2deg);
+            }
         }
 
         .register-container {
@@ -52,8 +60,8 @@
             backdrop-filter: blur(10px);
             background: rgba(255, 255, 255, 0.95);
             border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 
-                        0 0 0 1px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
             overflow: hidden;
             transform: translateY(0);
@@ -80,13 +88,18 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(255,255,255,0.1), transparent);
+            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             animation: rotate 20s linear infinite;
         }
 
         @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .logo-content {
@@ -165,7 +178,8 @@
             letter-spacing: 0.5px;
         }
 
-        .form-control, .form-select {
+        .form-control,
+        .form-select {
             border: 2px solid #e9ecef;
             border-radius: 10px;
             padding: 0.8rem 0.8rem 0.8rem 3rem;
@@ -174,7 +188,8 @@
             background: #f8f9fa;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.1);
             background: white;
@@ -192,8 +207,8 @@
             transition: all 0.3s ease;
         }
 
-        .form-control:focus + .input-icon,
-        .form-select:focus + .input-icon {
+        .form-control:focus+.input-icon,
+        .form-select:focus+.input-icon {
             color: var(--primary-color);
         }
 
@@ -232,7 +247,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: all 0.5s ease;
         }
 
@@ -323,8 +338,15 @@
         }
 
         @keyframes floatUpDown {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
         }
 
         .is-invalid {
@@ -344,9 +366,19 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-3px); }
-            75% { transform: translateX(3px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-3px);
+            }
+
+            75% {
+                transform: translateX(3px);
+            }
         }
 
         /* Alert Styles */
@@ -388,19 +420,19 @@
                 margin: 1rem;
                 border-radius: 16px;
             }
-            
+
             .logo-section {
                 padding: 1.5rem 1rem;
             }
-            
+
             .form-section {
                 padding: 1.5rem;
             }
-            
+
             .welcome-text {
                 font-size: 1.3rem;
             }
-            
+
             .form-title {
                 font-size: 1.5rem;
             }
@@ -417,6 +449,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="floating-shapes">
         <div class="shape"></div>
@@ -449,70 +482,70 @@
 
                                 <!-- Display Flash Messages -->
                                 @if (session('error'))
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <i class="fas fa-exclamation-circle me-2"></i>
-                                        {{ session('error') }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    {{ session('error') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
                                 @endif
 
                                 @if (session('success'))
-                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                        <i class="fas fa-check-circle me-2"></i>
-                                        {{ session('success') }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    {{ session('success') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
                                 @endif
 
                                 @if ($errors->any())
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
-                                        <strong>Ada kesalahan dalam form:</strong>
-                                        <ul class="mb-0 mt-2">
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Ada kesalahan dalam form:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
                                 @endif
 
                                 <form action="{{ route('register') }}" method="POST" id="registerForm">
                                     @csrf
-                                    
+
                                     <!-- Nama dan Email -->
                                     <div class="form-row">
                                         <div class="form-group flex-fill">
                                             <label for="name" class="form-label">Nama Lengkap</label>
                                             <div class="position-relative">
-                                                <input type="text" 
-                                                       class="form-control @error('name') is-invalid @enderror" 
-                                                       id="name" 
-                                                       name="name" 
-                                                       value="{{ old('name') }}"
-                                                       placeholder="Masukkan nama lengkap"
-                                                       required>
+                                                <input type="text"
+                                                    class="form-control @error('name') is-invalid @enderror"
+                                                    id="name"
+                                                    name="name"
+                                                    value="{{ old('name') }}"
+                                                    placeholder="Masukkan nama lengkap"
+                                                    required>
                                                 <i class="fas fa-user input-icon"></i>
                                             </div>
                                             @error('name')
-                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
 
                                         <div class="form-group flex-fill">
                                             <label for="email" class="form-label">Email Address</label>
                                             <div class="position-relative">
-                                                <input type="email" 
-                                                       class="form-control @error('email') is-invalid @enderror" 
-                                                       id="email" 
-                                                       name="email" 
-                                                       value="{{ old('email') }}"
-                                                       placeholder="email@example.com"
-                                                       required>
+                                                <input type="email"
+                                                    class="form-control @error('email') is-invalid @enderror"
+                                                    id="email"
+                                                    name="email"
+                                                    value="{{ old('email') }}"
+                                                    placeholder="email@example.com"
+                                                    required>
                                                 <i class="fas fa-envelope input-icon"></i>
                                             </div>
                                             @error('email')
-                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
@@ -522,19 +555,19 @@
                                         <div class="form-group flex-fill">
                                             <label for="password" class="form-label">Password</label>
                                             <div class="position-relative">
-                                                <input type="password" 
-                                                       class="form-control @error('password') is-invalid @enderror" 
-                                                       id="password" 
-                                                       name="password" 
-                                                       placeholder="Minimal 6 karakter (huruf + angka)"
-                                                       required>
+                                                <input type="password"
+                                                    class="form-control @error('password') is-invalid @enderror"
+                                                    id="password"
+                                                    name="password"
+                                                    placeholder="Minimal 6 karakter (huruf + angka)"
+                                                    required>
                                                 <i class="fas fa-lock input-icon"></i>
                                                 <button type="button" class="password-toggle" data-target="password">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
                                             </div>
                                             @error('password')
-                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                             <small class="text-muted">Password harus minimal 6 karakter dengan kombinasi huruf dan angka</small>
                                         </div>
@@ -542,12 +575,12 @@
                                         <div class="form-group flex-fill">
                                             <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
                                             <div class="position-relative">
-                                                <input type="password" 
-                                                       class="form-control" 
-                                                       id="password_confirmation" 
-                                                       name="password_confirmation" 
-                                                       placeholder="Ulangi password"
-                                                       required>
+                                                <input type="password"
+                                                    class="form-control"
+                                                    id="password_confirmation"
+                                                    name="password_confirmation"
+                                                    placeholder="Ulangi password"
+                                                    required>
                                                 <i class="fas fa-lock input-icon"></i>
                                                 <button type="button" class="password-toggle" data-target="password_confirmation">
                                                     <i class="fas fa-eye"></i>
@@ -564,34 +597,34 @@
                                         <div class="form-group flex-fill">
                                             <label for="kontak" class="form-label">Nomor Kontak</label>
                                             <div class="position-relative">
-                                                <input type="text" 
-                                                       class="form-control @error('kontak') is-invalid @enderror" 
-                                                       id="kontak" 
-                                                       name="kontak" 
-                                                       value="{{ old('kontak') }}"
-                                                       placeholder="08xxxxxxxxxx"
-                                                       required>
+                                                <input type="text"
+                                                    class="form-control @error('kontak') is-invalid @enderror"
+                                                    id="kontak"
+                                                    name="kontak"
+                                                    value="{{ old('kontak') }}"
+                                                    placeholder="08xxxxxxxxxx"
+                                                    required>
                                                 <i class="fas fa-phone input-icon"></i>
                                             </div>
                                             @error('kontak')
-                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
 
                                         <div class="form-group flex-fill">
                                             <label for="date_of_birth" class="form-label">Tanggal Lahir</label>
                                             <div class="position-relative">
-                                                <input type="date" 
-                                                       class="form-control @error('date_of_birth') is-invalid @enderror" 
-                                                       id="date_of_birth" 
-                                                       name="date_of_birth" 
-                                                       value="{{ old('date_of_birth') }}"
-                                                       max="{{ date('Y-m-d') }}"
-                                                       required>
+                                                <input type="date"
+                                                    class="form-control @error('date_of_birth') is-invalid @enderror"
+                                                    id="date_of_birth"
+                                                    name="date_of_birth"
+                                                    value="{{ old('date_of_birth') }}"
+                                                    max="{{ date('Y-m-d') }}"
+                                                    required>
                                                 <i class="fas fa-calendar input-icon"></i>
                                             </div>
                                             @error('date_of_birth')
-                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
@@ -601,10 +634,10 @@
                                         <div class="form-group flex-fill">
                                             <label for="gender" class="form-label">Jenis Kelamin</label>
                                             <div class="position-relative">
-                                                <select class="form-select @error('gender') is-invalid @enderror" 
-                                                        id="gender" 
-                                                        name="gender" 
-                                                        required>
+                                                <select class="form-select @error('gender') is-invalid @enderror"
+                                                    id="gender"
+                                                    name="gender"
+                                                    required>
                                                     <option value="">Pilih jenis kelamin</option>
                                                     <option value="laki-laki" {{ old('gender') == 'laki-laki' ? 'selected' : '' }}>Laki-laki</option>
                                                     <option value="perempuan" {{ old('gender') == 'perempuan' ? 'selected' : '' }}>Perempuan</option>
@@ -612,33 +645,33 @@
                                                 <i class="fas fa-venus-mars input-icon"></i>
                                             </div>
                                             @error('gender')
-                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
 
                                         <div class="form-group flex-fill">
                                             <label for="id_kota" class="form-label">Kota</label>
                                             <div class="position-relative">
-                                                <select class="form-select @error('id_kota') is-invalid @enderror" 
-                                                        id="id_kota" 
-                                                        name="id_kota" 
-                                                        required>
+                                                <select class="form-select @error('id_kota') is-invalid @enderror"
+                                                    id="id_kota"
+                                                    name="id_kota"
+                                                    required>
                                                     <option value="">Pilih kota</option>
                                                     @if(isset($kotas) && $kotas->count() > 0)
-                                                        @foreach($kotas as $kota)
-                                                            <option value="{{ $kota->id_kota }}" 
-                                                                    {{ old('id_kota') == $kota->id_kota ? 'selected' : '' }}>
-                                                                {{ $kota->nama_kota }}
-                                                            </option>
-                                                        @endforeach
+                                                    @foreach($kotas as $kota)
+                                                    <option value="{{ $kota->id_kota }}"
+                                                        {{ old('id_kota') == $kota->id_kota ? 'selected' : '' }}>
+                                                        {{ $kota->nama_kota }}
+                                                    </option>
+                                                    @endforeach
                                                     @else
-                                                        <option value="" disabled>Data kota tidak tersedia</option>
+                                                    <option value="" disabled>Data kota tidak tersedia</option>
                                                     @endif
                                                 </select>
                                                 <i class="fas fa-map-marker-alt input-icon"></i>
                                             </div>
                                             @error('id_kota')
-                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
@@ -647,35 +680,35 @@
                                     <div class="form-group">
                                         <label for="alamat" class="form-label">Alamat Lengkap</label>
                                         <div class="position-relative">
-                                            <textarea class="form-control @error('alamat') is-invalid @enderror" 
-                                                      id="alamat" 
-                                                      name="alamat" 
-                                                      rows="3"
-                                                      placeholder="Masukkan alamat lengkap"
-                                                      style="padding-left: 3rem;"
-                                                      required>{{ old('alamat') }}</textarea>
+                                            <textarea class="form-control @error('alamat') is-invalid @enderror"
+                                                id="alamat"
+                                                name="alamat"
+                                                rows="3"
+                                                placeholder="Masukkan alamat lengkap"
+                                                style="padding-left: 3rem;"
+                                                required>{{ old('alamat') }}</textarea>
                                             <i class="fas fa-map-marker-alt input-icon" style="top: 1.2rem;"></i>
                                         </div>
                                         @error('alamat')
-                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <!-- Terms & Conditions -->
                                     <div class="terms-check">
                                         <div class="form-check">
-                                            <input class="form-check-input @error('terms') is-invalid @enderror" 
-                                                   type="checkbox" 
-                                                   name="terms" 
-                                                   id="terms" 
-                                                   {{ old('terms') ? 'checked' : '' }}
-                                                   required>
+                                            <input class="form-check-input @error('terms') is-invalid @enderror"
+                                                type="checkbox"
+                                                name="terms"
+                                                id="terms"
+                                                {{ old('terms') ? 'checked' : '' }}
+                                                required>
                                             <label class="form-check-label" for="terms">
-                                                Saya menyetujui <a href="#" class="text-primary">Syarat & Ketentuan</a> 
+                                                Saya menyetujui <a href="#" class="text-primary">Syarat & Ketentuan</a>
                                                 dan <a href="#" class="text-primary">Kebijakan Privasi</a> ALKES SHOP
                                             </label>
                                             @error('terms')
-                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
@@ -712,7 +745,7 @@
                 const targetId = this.getAttribute('data-target');
                 const targetInput = document.getElementById(targetId);
                 const icon = this.querySelector('i');
-                
+
                 if (targetInput.type === 'password') {
                     targetInput.type = 'text';
                     icon.classList.remove('fa-eye');
@@ -759,7 +792,7 @@
             const hasLetter = /[a-zA-Z]/.test(value);
             const hasNumber = /\d/.test(value);
             const isLongEnough = value.length >= 6;
-            
+
             if (value.length > 0) {
                 if (hasLetter && hasNumber && isLongEnough) {
                     this.classList.remove('is-invalid');
@@ -776,15 +809,15 @@
         // Form Submission Handler
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             console.log('Form submission started');
-            
+
             const button = document.getElementById('submitBtn');
             const formData = new FormData(this);
-            
+
             // Debug: Log form data
             for (let [key, value] of formData.entries()) {
                 console.log(key, value);
             }
-            
+
             // Disable button and show loading
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Membuat Akun...';
             button.disabled = true;
@@ -795,7 +828,7 @@
             input.addEventListener('focus', function() {
                 this.parentElement.style.transform = 'scale(1.01)';
             });
-            
+
             input.addEventListener('blur', function() {
                 this.parentElement.style.transform = 'scale(1)';
             });
@@ -804,21 +837,21 @@
         // Phone Number Formatting
         document.getElementById('kontak').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            
+
             // Auto-add 0 prefix for Indonesian numbers
             if (value.length > 0 && !value.startsWith('0')) {
                 if (value.startsWith('8')) {
                     value = '0' + value;
                 }
             }
-            
+
             // Limit to reasonable phone number length
             if (value.length > 15) {
                 value = value.substring(0, 15);
             }
-            
+
             e.target.value = value;
-            
+
             // Basic validation feedback
             if (value.length >= 10 && value.length <= 15 && value.startsWith('0')) {
                 this.classList.remove('is-invalid');
@@ -837,12 +870,12 @@
             const today = new Date();
             const age = today.getFullYear() - selectedDate.getFullYear();
             const monthDiff = today.getMonth() - selectedDate.getMonth();
-            
+
             // More precise age calculation
-            const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate()) 
-                ? age - 1 
-                : age;
-            
+            const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate()) ?
+                age - 1 :
+                age;
+
             if (actualAge < 13) {
                 this.setCustomValidity('Usia minimal 13 tahun');
                 this.classList.add('is-invalid');
@@ -865,7 +898,7 @@
                 if (this.id === 'password_confirmation') {
                     return;
                 }
-                
+
                 if (this.validity.valid && this.value.trim() !== '') {
                     this.classList.remove('is-invalid');
                     this.classList.add('is-valid');
@@ -880,7 +913,7 @@
         document.getElementById('name').addEventListener('input', function() {
             const value = this.value;
             const isValid = /^[a-zA-Z\s]*$/.test(value);
-            
+
             if (!isValid && value.length > 0) {
                 this.classList.add('is-invalid');
                 this.classList.remove('is-valid');
@@ -896,7 +929,7 @@
         document.getElementById('email').addEventListener('input', function() {
             const value = this.value;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
+
             if (value.length > 0) {
                 if (emailRegex.test(value)) {
                     this.classList.remove('is-invalid');
@@ -928,7 +961,7 @@
         // Debug: Check if kotas data is available
         const kotaSelect = document.getElementById('id_kota');
         console.log('Kota options count:', kotaSelect.options.length - 1); // -1 for placeholder option
-        
+
         if (kotaSelect.options.length <= 1) {
             console.error('No city data available - check database or controller');
         }
@@ -937,37 +970,41 @@
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             const requiredFields = this.querySelectorAll('[required]');
             let isValid = true;
-            
+
             requiredFields.forEach(field => {
                 if (!field.value.trim()) {
                     field.classList.add('is-invalid');
                     isValid = false;
                 }
             });
-            
+
             // Check password match
             if (password.value !== confirmPassword.value) {
                 isValid = false;
                 confirmPassword.classList.add('is-invalid');
             }
-            
+
             if (!isValid) {
                 e.preventDefault();
                 console.log('Form validation failed');
-                
+
                 // Re-enable submit button
                 const button = document.getElementById('submitBtn');
                 button.innerHTML = '<i class="fas fa-user-plus me-2"></i>Buat Akun Sekarang';
                 button.disabled = false;
-                
+
                 // Scroll to first error
                 const firstError = this.querySelector('.is-invalid');
                 if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                     firstError.focus();
                 }
             }
         });
     </script>
 </body>
+
 </html>

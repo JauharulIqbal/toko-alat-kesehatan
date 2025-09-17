@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="ALKES SHOP - Toko Alat Kesehatan Terpercaya dengan produk berkualitas dan harga kompetitif">
     <meta name="keywords" content="alat kesehatan, medical equipment, obat, farmasi, rumah sakit">
     <meta name="author" content="ALKES SHOP">
@@ -40,6 +41,25 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: var(--bs-dark);
+        }
+        
+        /* Preloader */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+        
+        #preloader.fade-out {
+            opacity: 0;
         }
         
         /* Custom scrollbar */
@@ -112,17 +132,6 @@
             box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
         }
         
-        .btn-gradient {
-            background: var(--primary-gradient);
-            border: none;
-            color: white;
-        }
-        
-        .btn-gradient:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%);
-            transform: translateY(-2px);
-        }
-        
         /* Form controls */
         .form-control {
             border-radius: 8px;
@@ -134,19 +143,6 @@
         .form-control:focus {
             border-color: var(--bs-primary);
             box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
-        }
-        
-        /* Badge enhancements */
-        .badge {
-            font-weight: 500;
-            border-radius: 6px;
-            padding: 0.4em 0.8em;
-        }
-        
-        /* Alert enhancements */
-        .alert {
-            border-radius: 8px;
-            border-width: 2px;
         }
         
         /* Loading spinner */
@@ -162,40 +158,6 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-        
-        /* Product grid responsive */
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        @media (max-width: 768px) {
-            .product-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 1rem;
-            }
-        }
-        
-        /* Toast notifications */
-        .toast {
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        /* Enhanced shadows */
-        .shadow-soft {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.06);
-        }
-        
-        .shadow-medium {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .shadow-strong {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 20px 40px rgba(0,0,0,0.1);
         }
         
         /* Navbar sticky enhancement */
@@ -220,18 +182,6 @@
             h2 { font-size: 1.5rem; }
             h3 { font-size: 1.25rem; }
         }
-        
-        /* Print styles */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            
-            body {
-                font-size: 12pt;
-                line-height: 1.4;
-            }
-        }
     </style>
     
     <!-- Additional Page Styles -->
@@ -240,7 +190,7 @@
 
 <body class="bg-light">
     <!-- Preloader -->
-    <div id="preloader" class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex align-items-center justify-content-center" style="z-index: 9999;">
+    <div id="preloader">
         <div class="text-center">
             <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
                 <span class="visually-hidden">Loading...</span>
@@ -250,11 +200,11 @@
         </div>
     </div>
 
-    <!-- Navigation -->
-    <x-customer.navbar />
-
     <!-- Main Content -->
-    <main id="main-content">
+    <div id="main-content" style="display: none;">
+        <!-- Navigation -->
+        <x-customer.navbar />
+
         <!-- Flash Messages -->
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show m-4" role="alert">
@@ -293,13 +243,13 @@
         @endif
 
         <!-- Page Content -->
-        <div class="fade-in">
+        <main class="fade-in">
             {{ $slot }}
-        </div>
-    </main>
+        </main>
 
-    <!-- Footer -->
-    <x-customer.footer />
+        <!-- Footer -->
+        <x-customer.footer />
+    </div>
 
     <!-- Toast Container -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
@@ -310,19 +260,34 @@
     
     <!-- Custom JavaScript -->
     <script>
-        // Preloader
+        // Preloader Management
         document.addEventListener('DOMContentLoaded', function() {
             const preloader = document.getElementById('preloader');
+            const mainContent = document.getElementById('main-content');
             
-            // Hide preloader after page loads
-            window.addEventListener('load', function() {
+            // Function to hide preloader
+            function hidePreloader() {
+                preloader.classList.add('fade-out');
                 setTimeout(() => {
-                    preloader.style.opacity = '0';
-                    setTimeout(() => {
-                        preloader.style.display = 'none';
-                    }, 300);
-                }, 500);
+                    preloader.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    mainContent.classList.add('fade-in');
+                }, 300);
+            }
+            
+            // Hide preloader after minimum time or when page loads
+            const minLoadTime = 1000; // Minimum 1 second
+            const startTime = Date.now();
+            
+            window.addEventListener('load', function() {
+                const loadTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minLoadTime - loadTime);
+                
+                setTimeout(hidePreloader, remainingTime);
             });
+            
+            // Fallback: hide preloader after 5 seconds maximum
+            setTimeout(hidePreloader, 5000);
         });
 
         // Toast Notification Function
@@ -373,20 +338,6 @@
             }
         });
 
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
         // Auto-hide alerts after 5 seconds
         document.querySelectorAll('.alert:not(.alert-permanent)').forEach(alert => {
             setTimeout(() => {
@@ -407,34 +358,22 @@
             return new bootstrap.Popover(popoverTriggerEl);
         });
 
-        // Cart functions (will be enhanced by specific page scripts)
+        // Cart functions
         window.cartFunctions = {
             updateCount: function(count) {
-                document.getElementById('cartCount').textContent = count;
+                const cartCount = document.getElementById('cartCount');
+                if (cartCount) {
+                    cartCount.textContent = count;
+                }
             },
             
             addToCart: function(productId, quantity = 1) {
-                // This will be implemented in the product pages
                 console.log('Add to cart:', productId, quantity);
             }
         };
 
-        // Search enhancement
-        const searchForm = document.querySelector('form[action*="search"]');
-        if (searchForm) {
-            const searchInput = searchForm.querySelector('input[name="q"]');
-            let searchTimeout;
-            
-            searchInput?.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    if (this.value.length >= 3) {
-                        // Implement live search suggestions here
-                        console.log('Search suggestions for:', this.value);
-                    }
-                }, 300);
-            });
-        }
+        // Make showToast available globally
+        window.showToast = showToast;
     </script>
 
     <!-- Page-specific JavaScript -->

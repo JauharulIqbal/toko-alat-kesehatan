@@ -34,7 +34,12 @@ class Toko extends Model
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
-
+    
+// Gunakan nama plural untuk hasMany relationships
+    public function produks()
+    {
+        return $this->hasMany(Produk::class, 'id_toko', 'id_toko');
+    }
 
     public function produk()
     {
@@ -52,5 +57,15 @@ class Toko extends Model
     public function availableProducts()
     {
         return $this->produk()->where('stok', '>', 0);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status_toko', 'disetujui');
+    }
+
+    public function scopeWithProductCount($query)
+    {
+        return $query->withCount('produk');
     }
 }

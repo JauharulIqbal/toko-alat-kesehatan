@@ -36,14 +36,14 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'date_of_birth' => 'date', // Pastikan ini date, bukan datetime
+        'date_of_birth' => 'date',
         'password' => 'hashed',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
     // Relationships
-    
+
     public function kota()
     {
         return $this->belongsTo(Kota::class, 'id_kota');
@@ -66,7 +66,12 @@ class User extends Authenticatable
 
     public function feedback()
     {
-        return $this->hasMany(Feedback::class, 'id_user');
+        return $this->hasMany(Feedback::class, 'id_user', 'id_user');
+    }
+
+    public function nomorRekeningPengguna()
+    {
+        return $this->hasMany(NomorRekeningPengguna::class, 'id_user', 'id_user');
     }
 
     // Accessor untuk mengatasi masalah casting
@@ -88,5 +93,15 @@ class User extends Authenticatable
 
         // Jika string date, parse ke Carbon
         return \Carbon\Carbon::parse($value);
+    }
+
+    // Mutator untuk memastikan date_of_birth tersimpan dengan benar
+    public function setDateOfBirthAttribute($value)
+    {
+        if (is_null($value) || $value === '') {
+            $this->attributes['date_of_birth'] = null;
+        } else {
+            $this->attributes['date_of_birth'] = \Carbon\Carbon::parse($value)->format('Y-m-d');
+        }
     }
 }
